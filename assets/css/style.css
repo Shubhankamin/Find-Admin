@@ -1,0 +1,797 @@
+* {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  /* font-family: "nunito"; */
+  /* For Webkit browsers (e.g., Chrome, Safari) */
+
+  scroll-behavior: smooth !important;
+
+  /* For Firefox */
+  /* scrollbar-width: none; */
+
+  /* For IE and Edge */
+  /* -ms-overflow-style: none; */
+}
+::-webkit-scrollbar {
+  display: none;
+  scroll-behavior: smooth;
+}
+
+/* ::-webkit-scrollbar {
+  width: 10px;
+}
+
+Track
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d3f576; 
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d3f576; 
+} */
+
+@font-face {
+  font-family: "Bebas";
+  src: url("/public/fonts/Bebas.ttf") format("truetype");
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "manrope";
+  src: url("/public/fonts/manrope.ttf") format("truetype");
+  font-style: normal;
+  font-display: swap;
+}
+
+@media (max-width: 1640px) {
+  .bebas-Bold-h1 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 80px;
+  }
+  .bebas-Bold-h2 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 56px;
+  }
+  .bebas-Bold-h3 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 36px;
+  }
+  .bebas-Bold-h4 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 28px;
+  }
+  .bebas-Bold-h5 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 20px;
+  }
+
+  .bebas-regular-h1 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 52px;
+  }
+  .bebas-regular-h2 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 46px;
+  }
+  .bebas-regular-h3 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 36px;
+  }
+  .bebas-regular-h4 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 28px;
+  }
+  .bebas-regular-h5 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 20px;
+  }
+
+  .manrope-Bold-h1 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 52px;
+  }
+  .manrope-Bold-h2 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 46px;
+  }
+  .manrope-Bold-h3 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 36px;
+  }
+  .manrope-Bold-h4 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 24px;
+  }
+  .manrope-Bold-h5 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 16px;
+  }
+
+  .manrope-regular-h1 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 52px;
+  }
+  .manrope-regular-h2 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 46px;
+  }
+  .manrope-regular-h3 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 36px;
+  }
+  .manrope-regular-h4 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 24px;
+  }
+  .manrope-regular-h5 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 1440px) {
+  .bebas-Bold-h1 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 50px;
+  }
+  .bebas-Bold-h2 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 44px;
+  }
+  .bebas-Bold-h3 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 34px;
+  }
+  .bebas-Bold-h4 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 26px;
+  }
+  .bebas-Bold-h5 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 18px;
+  }
+
+  .bebas-regular-h1 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 50px;
+  }
+  .bebas-regular-h2 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 44px;
+  }
+  .bebas-regular-h3 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 34px;
+  }
+  .bebas-regular-h4 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 26px;
+  }
+  .bebas-regular-h5 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 18px;
+  }
+
+  .manrope-Bold-h1 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 50px;
+  }
+  .manrope-Bold-h2 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 44px;
+  }
+  .manrope-Bold-h3 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 34px;
+  }
+  .manrope-Bold-h4 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 24px;
+  }
+  .manrope-Bold-h5 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 18px;
+  }
+
+  .manrope-regular-h1 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 50px;
+  }
+  .manrope-regular-h2 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 44px;
+  }
+  .manrope-regular-h3 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 34px;
+  }
+  .manrope-regular-h4 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 26px;
+  }
+  .manrope-regular-h5 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 18px;
+  }
+}
+@media (max-width: 1024px) {
+  .bebas-Bold-h1 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 46px;
+  }
+  .bebas-Bold-h2 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 40px;
+  }
+  .bebas-Bold-h3 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 30px;
+  }
+  .bebas-Bold-h4 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 22px;
+  }
+  .bebas-Bold-h5 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .bebas-regular-h1 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 46px;
+  }
+  .bebas-regular-h2 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 40px;
+  }
+  .bebas-regular-h3 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 30px;
+  }
+  .bebas-regular-h4 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 22px;
+  }
+  .bebas-regular-h5 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 14px;
+  }
+
+  .manrope-Bold-h1 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 46px;
+  }
+  .manrope-Bold-h2 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 40px;
+  }
+  .manrope-Bold-h3 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 30px;
+  }
+  .manrope-Bold-h4 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 20px;
+  }
+  .manrope-Bold-h5 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .manrope-regular-h1 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 46px;
+  }
+  .manrope-regular-h2 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 40px;
+  }
+  .manrope-regular-h3 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 30px;
+  }
+  .manrope-regular-h4 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 20px;
+  }
+  .manrope-regular-h5 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bebas-Bold-h1 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 40px;
+  }
+  .bebas-Bold-h2 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 36px;
+  }
+  .bebas-Bold-h3 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 28px;
+  }
+  .bebas-Bold-h4 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 20px;
+  }
+  .bebas-Bold-h5 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .bebas-regular-h1 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 40px;
+  }
+  .bebas-regular-h2 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 36px;
+  }
+  .bebas-regular-h3 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 28px;
+  }
+  .bebas-regular-h4 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 20px;
+  }
+  .bebas-regular-h5 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 12px;
+  }
+
+  .manrope-Bold-h1 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 40px;
+  }
+  .manrope-Bold-h2 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 36px;
+  }
+  .manrope-Bold-h3 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 28px;
+  }
+  .manrope-Bold-h4 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 20px;
+  }
+  .manrope-Bold-h5 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  .manrope-regular-h1 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 40px;
+  }
+  .manrope-regular-h2 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 36px;
+  }
+  .manrope-regular-h3 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 28px;
+  }
+  .manrope-regular-h4 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 20px;
+  }
+  .manrope-regular-h5 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 435px) {
+  .bebas-Bold-h1 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 36px;
+  }
+  .bebas-Bold-h2 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 32px;
+  }
+  .bebas-Bold-h3 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 26px;
+  }
+  .bebas-Bold-h4 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 18px;
+  }
+  .bebas-Bold-h5 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .bebas-regular-h1 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 36px;
+  }
+  .bebas-regular-h2 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 32px;
+  }
+  .bebas-regular-h3 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 26px;
+  }
+  .bebas-regular-h4 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 18px;
+  }
+  .bebas-regular-h5 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 14px;
+  }
+
+  .manrope-Bold-h1 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 36px;
+  }
+  .manrope-Bold-h2 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 32px;
+  }
+  .manrope-Bold-h3 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 26px;
+  }
+  .manrope-Bold-h4 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 18px;
+  }
+  .manrope-Bold-h5 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .manrope-regular-h1 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 36px;
+  }
+  .manrope-regular-h2 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 32px;
+  }
+  .manrope-regular-h3 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 26px;
+  }
+  .manrope-regular-h4 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 18px;
+  }
+  .manrope-regular-h5 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .bebas-Bold-h1 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 32px;
+  }
+  .bebas-Bold-h2 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 28px;
+  }
+  .bebas-Bold-h3 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 24px;
+  }
+  .bebas-Bold-h4 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 16px;
+  }
+  .bebas-Bold-h5 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 10px;
+  }
+
+  .bebas-regular-h1 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 32px;
+  }
+  .bebas-regular-h2 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 28px;
+  }
+  .bebas-regular-h3 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 24px;
+  }
+  .bebas-regular-h4 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 16px;
+  }
+  .bebas-regular-h5 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 12px;
+  }
+
+  .manrope-Bold-h1 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 32px;
+  }
+  .manrope-Bold-h2 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 28px;
+  }
+  .manrope-Bold-h3 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 24px;
+  }
+  .manrope-Bold-h4 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 16px;
+  }
+  .manrope-Bold-h5 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 10px;
+  }
+
+  .manrope-regular-h1 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 32px;
+  }
+  .manrope-regular-h2 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 28px;
+  }
+  .manrope-regular-h3 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 24px;
+  }
+  .manrope-regular-h4 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 16px;
+  }
+  .manrope-regular-h5 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 320px) {
+  .bebas-Bold-h1 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 28px;
+  }
+  .bebas-Bold-h2 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 24px;
+  }
+  .bebas-Bold-h3 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 20px;
+  }
+  .bebas-Bold-h4 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 14px;
+  }
+  .bebas-Bold-h5 {
+    font-family: Bebas;
+    font-weight: 500;
+    font-size: 10px;
+  }
+
+  .bebas-regular-h1 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 28px;
+  }
+  .bebas-regular-h2 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 24px;
+  }
+  .bebas-regular-h3 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 20px;
+  }
+  .bebas-regular-h4 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 16px;
+  }
+  .bebas-regular-h5 {
+    font-family: Bebas;
+    font-weight: 100;
+    font-size: 14px;
+  }
+
+  .manrope-Bold-h1 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 28px;
+  }
+  .manrope-Bold-h2 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 24px;
+  }
+  .manrope-Bold-h3 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 20px;
+  }
+  .manrope-Bold-h4 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 14px;
+  }
+  .manrope-Bold-h5 {
+    font-family: manrope;
+    font-weight: 500;
+    font-size: 10px;
+  }
+
+  .manrope-regular-h1 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 28px;
+  }
+  .manrope-regular-h2 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 24px;
+  }
+  .manrope-regular-h3 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 20px;
+  }
+  .manrope-regular-h4 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 16px;
+  }
+  .manrope-regular-h5 {
+    font-family: manrope;
+    font-weight: 100;
+    font-size: 14px;
+  }
+}
+
+.pointer {
+  cursor: pointer;
+}
