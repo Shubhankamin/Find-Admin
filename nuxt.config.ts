@@ -2,7 +2,7 @@ import vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
 export default defineNuxtConfig({
   //...
   build: {
-    transpile: ["vuetify"],
+    transpile: ["vuetify", "@vuepic/vue-datepicker"],
   },
   css: ["@/assets/css/style.css"],
 

@@ -55,8 +55,8 @@
 <script setup>
 const menuItems = [
   { title: 'Dashboard', to: '/' },
-  { title: 'Lost Items', to: '/admin/lostitems' },
-  { title: 'Settings', to: '/admin/settings' }
+  { title: 'Lost Items', to: '/items' },
+  { title: 'Settings', to: '/items/[id]' }
 ]
 </script>
 

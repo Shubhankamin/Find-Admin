@@ -40,22 +40,16 @@
     <v-card elevation="3">
       <v-table>
         <thead>
-          <tr>
-            <th class="text-left">Image</th>
-            <th class="text-left">Item Name</th>
-            <th class="text-left">Location</th>
-            <th class="text-left">Status</th>
-            <th class="text-left">Posted On</th>
-            <th class="text-left">Action</th>
+          <tr class="bg-grey">
+            <th class="text-left heading font-bold" style="font-weight: bold;">Item Name</th>
+            <th class="text-left heading" style="font-weight: bold;">Location</th>
+            <th class="text-left heading" style="font-weight: bold;">Status</th>
+            <th class="text-left heading" style="font-weight: bold;">Posted On</th>
+            <th class="text-left heading" style="font-weight: bold;">Action</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(item, i) in recentLostItems" :key="i">
-            <td>
-              <v-avatar size="40">
-                <v-img :src="item.image" />
-              </v-avatar>
-            </td>
             <td>{{ item.name }}</td>
             <td>{{ item.location }}</td>
             <td>
@@ -119,3 +113,8 @@ const recentLostItems = [
   },
 ];
 </script>
+<style scoped>
+.th{
+  font-weight:900;
+}
+</style>

@@ -1,6 +1,6 @@
 <template>
   <v-container fluid class="bg-grey-lighten-4 fill-height">
-    <v-row align="center" justify="center" class="fill-height">
+    <v-row justify="center" class="fill-height">
       <v-col cols="12" sm="8" md="4">
         <v-card class="pa-8" elevation="10" rounded="xl">
           <!-- Logo -->
