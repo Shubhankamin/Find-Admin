@@ -11,7 +11,7 @@
         <h2 class="mb-4">Add New Lost Item</h2>
       </div>
     </div>
-    <v-container fluid>
+    <v-container fluid class="px-5">
       <v-form
         ref="formRef"
         v-model="isValid"
@@ -98,6 +98,7 @@
               placeholder="Select Threshold"
               variant="outlined"
               required
+              density="compact"
             />
           </v-col>
 

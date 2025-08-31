@@ -1,23 +1,7 @@
 <template>
   <v-app>
-    <v-navigation-drawer
-      app
-      permanent
-      color="white"
-      width="220"
-      class="pa-4"
-    >
-      <!-- Logo -->
-      <div class="d-flex align-center mb-6">
-        <!-- <v-img
-          src="/logo.png"
-          max-width="40"
-          class="mr-3"
-        ></v-img> -->
-        <h2 class="font-weight-bold">Lost & Found</h2>
-      </div>
-
-      <!-- Sidebar Menu -->
+    <v-navigation-drawer app permanent color="white" width="220" class="pa-4">
+      <!-- Sidebar -->
       <v-list density="compact" nav>
         <v-list-item
           v-for="(item, index) in menuItems"
@@ -37,31 +21,57 @@
           variant="tonal"
           class="mt-5"
           prepend-icon="mdi-logout"
+          @click="showDialog = true"
         >
           Logout
         </v-btn>
       </div>
     </v-navigation-drawer>
 
-    <!-- Main Content -->
     <v-main>
       <v-container fluid>
         <slot />
       </v-container>
     </v-main>
+
+    <!-- Reusable Confirmation Dialog -->
+    <ConfirmDialog
+      v-model="showDialog"
+      title="Confirm Logout"
+      message="Are you sure you want to log out?"
+      confirm-text="Logout"
+      cancel-text="Cancel"
+      @confirm="handleLogout"
+    />
   </v-app>
 </template>
 
 <script setup>
-const menuItems = [
-  { title: 'Dashboard', to: '/' },
-  { title: 'Lost Items', to: '/items' },
-  { title: 'Settings', to: '/items/[id]' }
-]
-</script>
+import { ref } from "vue";
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
+import { useRouter } from "vue-router";
 
-<style scoped>
-.v-navigation-drawer {
-  border-right: 1px solid #e0e0e0;
+// ✅ Import signOut and auth from Firebase
+import { getAuth, signOut } from "firebase/auth";
+
+const menuItems = [
+  { title: "Dashboard", to: "/" },
+  { title: "Lost Items", to: "/items" },
+  { title: "Settings", to: "/items/[id]" },
+];
+
+const showDialog = ref(false);
+const router = useRouter();
+
+// ✅ Get auth instance
+const auth = getAuth();
+
+async function handleLogout() {
+  try {
+    await signOut(auth); // Firebase logout
+    router.push("/login");
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
 }
-</style>
+</script>

@@ -1,37 +1,36 @@
 <template>
   <v-container fluid class="bg-grey-lighten-4 fill-height">
     <v-row justify="center" class="fill-height">
-      <v-col cols="12" sm="8" md="4">
-        <v-card class="pa-8" elevation="10" rounded="xl">
+      <v-col cols="12" sm="8" md="4" class="d-flex align-center">
+        <v-card class="pa-8 w-100" elevation="10" rounded="xl">
           <!-- Logo -->
           <div class="text-center mb-6">
             <v-icon color="primary" size="48">mdi-shield-lock</v-icon>
             <h2 class="text-h5 font-weight-bold mt-3">Admin Login</h2>
           </div>
 
-          <!-- Login Form -->
-          <v-form @submit.prevent="handleLogin" v-model="isFormValid">
+          <v-form ref="form" v-model="valid" @submit.prevent="login">
+            <!-- Email -->
             <v-text-field
               v-model="email"
               placeholder="Enter your email"
               variant="outlined"
               prepend-inner-icon="mdi-email"
               type="email"
-              :rules="[rules.required, rules.email]"
               class="mb-4"
+              :rules="emailRules"
               required
             ></v-text-field>
 
+            <!-- Password -->
             <v-text-field
               v-model="password"
-              :type="showPassword ? 'text' : 'password'"
               placeholder="Enter your password"
               variant="outlined"
               prepend-inner-icon="mdi-lock"
-              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-              @click:append-inner="togglePassword"
-              :rules="[rules.required]"
+              type="password"
               class="mb-6"
+              :rules="passwordRules"
               required
             ></v-text-field>
 
@@ -42,59 +41,106 @@
               block
               size="large"
               :loading="loading"
+              :disabled="!valid"
             >
               Login
             </v-btn>
           </v-form>
 
           <!-- Forgot Password -->
-          <div class="text-center mt-4">
+          <!-- <div class="text-center mt-4">
             <NuxtLink
               to="/admin/forgot-password"
               class="text-primary text-decoration-none"
             >
               Forgot Password?
             </NuxtLink>
-          </div>
+          </div> -->
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- Snackbar -->
+    <v-snackbar v-model="snackbar" :timeout="3000" :color="snackbarColor">
+      {{ snackbarMessage }}
+      <template #actions>
+        <v-btn variant="text" @click="snackbar = false">Close</v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
+definePageMeta({
+  layout: "custom",
+});
 const email = ref("");
-const password = ref('')
-const showPassword = ref(false)
-
-const togglePassword = () => {
-  showPassword.value = !showPassword.value
-}
+const password = ref("");
+const valid = ref(false);
 const loading = ref(false);
-const isFormValid = ref(false);
 
-const rules = {
-  required: (value) => !!value || "Required",
-  email: (value) => /.+@.+\..+/.test(value) || "Invalid email",
-};
+const snackbar = ref(false);
+const snackbarMessage = ref("");
+const snackbarColor = ref("error"); // 'success' for success messages
 
-const handleLogin = () => {
-  if (!isFormValid.value) return;
+const router = useRouter();
+const auth = getAuth();
+const db = getFirestore();
+
+// ✅ Validation rules
+const emailRules = [
+  (v) => !!v || "Email is required",
+  (v) => /.+@.+\..+/.test(v) || "Email must be valid",
+];
+const passwordRules = [
+  (v) => !!v || "Password is required",
+  (v) => v.length >= 6 || "Password must be at least 6 characters",
+];
+
+async function login() {
+  const form = document.querySelector("form");
+  if (!valid.value) return;
 
   loading.value = true;
-  setTimeout(() => {
-    loading.value = false;
-    console.log("Email:", email.value, "Password:", password.value);
-    // Redirect after successful login
-    navigateTo("/admin");
-  }, 1500);
-};
-</script>
+  snackbar.value = false;
 
-<style scoped>
-.fill-height {
-  height: 100vh;
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email.value,
+      password.value
+    );
+    const user = userCredential.user;
+
+    const adminRef = doc(db, "admins", user.uid);
+    const adminDoc = await getDoc(adminRef);
+
+    if (adminDoc.exists()) {
+      snackbarColor.value = "success";
+      snackbarMessage.value = "Login successful!";
+      snackbar.value = true;
+
+      await router.push("/");
+    } else {
+      await signOut(auth);
+      snackbarColor.value = "error";
+      snackbarMessage.value = "Access denied: You are not an admin.";
+      snackbar.value = true;
+      // email.value = "";
+      // password.value = "";
+      form.reset();
+    }
+  } catch (error) {
+    snackbarColor.value = "error";
+    snackbarMessage.value = "Invalid credentials.";
+    snackbar.value = true;
+  } finally {
+    loading.value = false;
+  }
 }
-</style>
+</script>

@@ -67,7 +67,7 @@
                 size="small"
                 color="primary"
                 variant="tonal"
-                :to="`/admin/lostitems/${item.id}`"
+                :to="`/items/${item.id}`"
               >
                 View
               </v-btn>
