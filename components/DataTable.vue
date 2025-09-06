@@ -31,10 +31,9 @@
           </v-btn>
 
           <v-switch
-            v-model="item.enabled"
-            @change="emitToggle(item)"
-            hide-details
-            :color="item.enabled ? 'blue' : ''"
+            v-model="item.isEnabled"
+            color="primary"
+            @change="$emit('toggle', item)"
           />
         </div>
       </template>

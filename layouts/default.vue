@@ -65,10 +65,11 @@ const router = useRouter();
 
 // ✅ Get auth instance
 const auth = getAuth();
-
+const user = useCookie("user");
 async function handleLogout() {
   try {
     await signOut(auth); // Firebase logout
+    user.value = null; // Clear user cookie
     router.push("/login");
   } catch (error) {
     console.error("Logout failed:", error);

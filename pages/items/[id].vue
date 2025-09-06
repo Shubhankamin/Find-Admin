@@ -5,7 +5,8 @@
         >mdi-arrow-left</v-icon
       >
       <div v-if="mode == 'edit'">
-        <h2 class="mb-4">Edit {{ itemId }}</h2>
+        <!-- {{ form.threshold }} -->
+        <h2 class="mb-4">Edit {{ form?.name }}</h2>
       </div>
       <div v-else>
         <h2 class="mb-4">Add New Lost Item</h2>
@@ -90,7 +91,7 @@
           </v-col>
           <v-col cols="12" md="6">
             <p class="py-2">Threshold:</p>
-             <v-select
+            <v-select
               v-model="form.threshold"
               :items="thresholdOptions"
               item-title="label"
@@ -111,15 +112,29 @@
                 cols="3"
                 class="d-flex flex-column align-center pt-10"
               >
-                <div class="box">
+                <div class="relative d-inline-block">
+                  <!-- Image Preview -->
                   <v-img
                     v-if="img"
                     :src="img"
-                    class="mb-2"
+                    class="mb-2 rounded-lg"
                     height="100"
                     width="100"
                     cover
                   />
+
+                  <!-- Delete Button (top-right) -->
+                  <v-btn
+                    v-if="img"
+                    icon="mdi-close"
+                    size="small"
+                    variant="flat"
+                    color="red"
+                    class="absolute top-0 right-0"
+                    @click="removeImage(index)"
+                  />
+
+                  <!-- Upload Button -->
                   <v-btn
                     v-else
                     icon="mdi-plus"
@@ -127,6 +142,8 @@
                     color="grey"
                     @click="triggerFileInput(index)"
                   />
+
+                  <!-- Hidden File Input -->
                   <input
                     type="file"
                     accept="image/*"
@@ -152,18 +169,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
-import { useRouter } from "vue-router";
-import VueDatePicker from "@vuepic/vue-datepicker";
-import "@vuepic/vue-datepicker/dist/main.css";
-const date = ref();
+import { ref, reactive, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useGetOneLostItem } from "~/composables/items/getOneItem";
+import { useAddLostItem } from "~/composables/items/addItems";
+import { useUpdateLostItem } from "~/composables/items/updateItems";
+
+const { updateLostItem } = useUpdateLostItem();
 
 const router = useRouter();
-const isValid = ref(false);
 const route = useRoute();
+const { getOneLostItem } = useGetOneLostItem();
+const { addLostItem } = useAddLostItem(); // ✅
 
-// const mode = ref("add");
-
+const isValid = ref(false);
 const mode = route.query.mode;
 const itemId = route.params.id;
 
@@ -174,10 +193,10 @@ const form = reactive({
   description: "",
   location: "",
   email: "",
-  status: "",
+  status: "pending", // default
   postedAt: "",
   images: [],
-  threshold: null, // NEW FIELD
+  threshold: null,
 });
 
 const thresholdOptions = [
@@ -212,49 +231,95 @@ const handleImageUpload = (event: Event, index: number) => {
   }
 };
 
-const save = () => {
+// ✅ Fetch existing item if editing
+onMounted(async () => {
+  if (mode === "edit" && itemId) {
+    try {
+      const item = await getOneLostItem(itemId);
+      console.log("Fetched Item:", item);
+
+      form.name = item?.itemName || "";
+      form.description = item?.description || "";
+      form.location = item?.location || "";
+      form.email = item?.contactEmail || "";
+      form.status = item?.status || "";
+      form.postedAt =
+        item?.createdAt?.toDate?.().toISOString().substring(0, 10) || "";
+      form.threshold = item?.threshold || null;
+
+      // ✅ Hydrate images if they exist
+      if (Array.isArray(item?.images)) {
+        form.images = item.images;
+        imagePreviews.value = item.images.map((img: string) => img || null);
+
+        while (imagePreviews.value.length < 4) {
+          imagePreviews.value.push(null);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching item:", err);
+    }
+  }
+});
+
+const removeImage = (index: number) => {
+  form.images[index] = null;
+  imagePreviews.value[index] = null;
+};
+
+const convertToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
+const save = async () => {
   if (!isValid.value) return;
 
-  if (!form.postedAt || !form.threshold) {
-    alert("Please select both Posted At date and Threshold.");
-    return;
+  try {
+    const selectedImages = form.images.filter((img) => img);
+
+    // Convert only File objects → Base64
+    const processedImages = await Promise.all(
+      selectedImages.map(async (img: any) => {
+        if (img instanceof File) {
+          return await convertToBase64(img);
+        }
+        return img; // keep existing base64 strings
+      })
+    );
+
+    const payload = {
+      itemName: form.name,
+      description: form.description,
+      location: form.location,
+      contactEmail: form.email,
+      category: "default",
+      status: form.status || "pending",
+      images: processedImages,
+      threshold: form.threshold,
+    };
+
+    if (mode === "add") {
+      const id = await addLostItem(payload);
+      console.log("✅ Item added with ID:", id);
+      router.push("/items");
+    }
+
+    if (mode === "edit" && itemId) {
+      await updateLostItem(itemId as string, payload);
+      console.log("✅ Item updated successfully!");
+      router.push("/items");
+    }
+  } catch (err) {
+    console.error("❌ Error saving item:", err);
   }
-
-  const postedAtDate = new Date(form.postedAt);
-  if (isNaN(postedAtDate.getTime())) {
-    alert("Invalid Posted At date.");
-    return;
-  }
-
-  const thresholdDays = parseInt(form.threshold);
-  const expiryDate = new Date(postedAtDate);
-  expiryDate.setDate(expiryDate.getDate() + thresholdDays);
-
-  // Format for readable output
-  const formattedExpiryDate = expiryDate.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-
-  const data = {
-    ...form,
-    postedAt: postedAtDate.toISOString(),
-    thresholdDays: thresholdDays,
-    expiryDate: expiryDate.toISOString(),
-  };
-
-  console.log("Final Data (Ready to Save):", data);
-  console.log(`✅ Expiry Date (Readable): ${formattedExpiryDate}`);
-  alert(
-    `Data saved!\n\nExpiry Date: ${formattedExpiryDate}\n\n${JSON.stringify(
-      data,
-      null,
-      2
-    )}`
-  );
 };
 </script>
+
 <style scoped>
 .box {
   border: 2px dashed #ccc;

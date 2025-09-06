@@ -76,6 +76,7 @@ import { useRouter } from "vue-router";
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 
+
 definePageMeta({
   layout: "custom",
 });
@@ -102,8 +103,8 @@ const passwordRules = [
   (v) => v.length >= 6 || "Password must be at least 6 characters",
 ];
 
-async function login() {
-  const form = document.querySelector("form");
+const login = async () => {
+  const form = valid;
   if (!valid.value) return;
 
   loading.value = true;
@@ -117,10 +118,18 @@ async function login() {
     );
     const user = userCredential.user;
 
+    // Check if user is admin
     const adminRef = doc(db, "admins", user.uid);
     const adminDoc = await getDoc(adminRef);
 
     if (adminDoc.exists()) {
+      // ✅ Store auth data in cookies
+      const userCookie = useCookie("user");
+      userCookie.value = {
+        uid: user.uid,
+        email: user.email,
+      };
+
       snackbarColor.value = "success";
       snackbarMessage.value = "Login successful!";
       snackbar.value = true;
@@ -131,8 +140,7 @@ async function login() {
       snackbarColor.value = "error";
       snackbarMessage.value = "Access denied: You are not an admin.";
       snackbar.value = true;
-      // email.value = "";
-      // password.value = "";
+
       form.reset();
     }
   } catch (error) {
@@ -142,5 +150,6 @@ async function login() {
   } finally {
     loading.value = false;
   }
-}
+};
+
 </script>

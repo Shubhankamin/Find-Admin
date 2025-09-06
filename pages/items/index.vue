@@ -5,11 +5,7 @@
       <v-btn color="primary" @click="goToAddItem"> + Add New Item </v-btn>
     </v-row>
 
-    <!-- <VueDatePicker v-model="date" /> -->
-
-    <!-- 🔍 Search & Filter Row -->
     <v-row class="mb-4">
-      <!-- Search Box -->
       <v-col cols="12" md="6">
         <v-text-field
           v-model="search"
@@ -21,7 +17,6 @@
         />
       </v-col>
 
-      <!-- Status Filter -->
       <v-col cols="12" md="4">
         <v-select
           v-model="statusFilter"
@@ -34,7 +29,8 @@
       </v-col>
     </v-row>
 
-    <!-- ✅ DataTable Component -->
+    <!-- {{ items?.[0]?.threshold }} -->
+
     <DataTable
       :headers="headers"
       :items="filteredItems"
@@ -42,21 +38,34 @@
       @toggle="handleToggle"
       @click:item="handleItemClick"
     />
+
+    <ConfirmationDialog
+      v-model="dialog"
+      title="Delete Item"
+      message="Are you sure you want to delete this item? This action cannot be undone."
+      confirm-text="Delete"
+      cancel-text="Cancel"
+      @confirm="confirmDelete"
+      @cancel="dialog = false"
+    />
   </v-container>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import VueDatePicker from "@vuepic/vue-datepicker";
-import "@vuepic/vue-datepicker/dist/main.css";
-const date = ref();
-
+import { useGetLostItems } from "~/composables/items/getLostItems";
+import { useDeleteLostItem } from "~/composables/items/deleteItem";
+import { useUpdateLostItem } from "~/composables/items/updateItems";
 const router = useRouter();
 
+const { getLostItems } = useGetLostItems();
+const { deleteLostItem } = useDeleteLostItem();
+const { updateLostItem } = useUpdateLostItem();
 const search = ref("");
 const statusFilter = ref("");
-
+const dialog = ref(false);
+const selectedItem = ref<any>(null);
 const statusOptions = ["claimed", "pending"];
 
 const headers = [
@@ -69,41 +78,59 @@ const headers = [
   { title: "Actions", key: "actions", sortable: false },
 ];
 
-const items = ref([
-  {
-    id: 1,
-    name: "Laptop",
-    createdOn: "2025-08-20",
-    email: "user1@example.com",
-    status: "claimed",
-    threshold: "2 Weeks",
-    enabled: false,
-  },
-  {
-    id: 2,
-    name: "Bag",
-    createdOn: "2025-08-18",
-    email: "user2@example.com",
-    status: "pending",
-    threshold: "1 Month",
-    enabled: false,
-  },
-  {
-    id: 3,
-    name: "Watch",
-    createdOn: "2025-08-15",
-    email: "user3@example.com",
-    threshold: "3 Weeks",
-    status: "pending",
-    enabled: true,
-  },
-]);
+const items = ref<any[]>([]);
+
+const fetchItems = async () => {
+  const data = await getLostItems();
+
+  items.value = data.map((doc: any) => ({
+    id: doc.id,
+    name: doc.itemName,
+    email: doc.contactEmail,
+    createdOn: doc.createdAt?.toDate?.()?.toLocaleDateString() ?? "",
+    status: doc.status,
+    threshold: doc.threshold || "—",
+    isEnabled: doc.isEnabled ?? false,
+  }));
+
+  console.log("Items:", items.value);
+};
+
+// const items = ref([
+//   {
+//     id: 1,
+//     name: "Laptop",
+//     createdOn: "2025-08-20",
+//     email: "user1@example.com",
+//     status: "claimed",
+//     threshold: "2 Weeks",
+//     isEnabled: false,
+//   },
+//   {
+//     id: 2,
+//     name: "Bag",
+//     createdOn: "2025-08-18",
+//     email: "user2@example.com",
+//     status: "pending",
+//     threshold: "1 Month",
+//     isEnabled: false,
+//   },
+//   {
+//     id: 3,
+//     name: "Watch",
+//     createdOn: "2025-08-15",
+//     email: "user3@example.com",
+//     threshold: "3 Weeks",
+//     status: "pending",
+//     isEnabled: true,
+//   },
+// ]);
 
 const filteredItems = computed(() => {
   return items.value.filter((item) => {
     const matchesSearch = item.name
       .toLowerCase()
-      .includes(search.value.toLowerCase());
+      .includes(search?.value?.toLowerCase());
     const matchesStatus = statusFilter.value
       ? item.status === statusFilter.value
       : true;
@@ -111,14 +138,40 @@ const filteredItems = computed(() => {
   });
 });
 
+onMounted(() => {
+  fetchItems();
+});
+
 const handleDelete = (item: any) => {
-  items.value = items.value.filter((i) => i.id !== item.id);
-  console.log("Deleted:", item);
+  console.log("Delete clicked for:", item);
+  selectedItem.value = item; // store the clicked item
+  dialog.value = true; // ✅ open dialog
 };
 
-const handleToggle = (item: any) => {
-  item.enabled = !item.enabled;
-  console.log("Toggled:", item);
+const confirmDelete = async () => {
+  if (!selectedItem.value) return;
+  try {
+    await deleteLostItem(selectedItem.value.id); // ✅ Firestore delete
+    items.value = items.value.filter((i) => i.id !== selectedItem.value.id);
+    console.log("Deleted:", selectedItem.value);
+  } catch (err) {
+    console.error("❌ Error deleting item:", err);
+  } finally {
+    dialog.value = false; // close dialog
+    selectedItem.value = null;
+  }
+};
+
+const handleToggle = async (item: any) => {
+  try {
+    // item.isEnabled = !item.isEnabled; // optimistic UI update
+    await updateLostItem(item.id, { isEnabled: item.isEnabled });
+    console.log("✅ isEnabled updated:", item);
+  } catch (err) {
+    console.error("❌ Failed to update isEnabled:", err);
+    // rollback if failed
+    item.isEnabled = !item.isEnabled;
+  }
 };
 
 const goToAddItem = () => {
