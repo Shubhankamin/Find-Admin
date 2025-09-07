@@ -1,13 +1,18 @@
 <template>
   <v-app>
     <v-navigation-drawer app permanent color="white" width="220" class="pa-4">
+      <v-row class="justify-center">
+        <v-col cols="10">
+          <v-img src="/images/logo-2.png" alt="Logo" contain></v-img>
+        </v-col>
+      </v-row>
       <!-- Sidebar -->
       <v-list density="compact" nav>
         <v-list-item
           v-for="(item, index) in menuItems"
           :key="index"
           :to="item.to"
-          prepend-icon="mdi-chevron-right"
+          :prepend-icon="item.icon"
         >
           <v-list-item-title>{{ item.title }}</v-list-item-title>
         </v-list-item>
@@ -55,9 +60,9 @@ import { useRouter } from "vue-router";
 import { getAuth, signOut } from "firebase/auth";
 
 const menuItems = [
-  { title: "Dashboard", to: "/" },
-  { title: "Lost Items", to: "/items" },
-  { title: "Settings", to: "/items/[id]" },
+  { title: "Dashboard", to: "/", icon: "mdi-view-dashboard" },
+  { title: "Lost Items", to: "/items", icon: "mdi-package-variant" },
+  // { title: "Settings", to: "/items/[id]", icon: "mdi-cog" },
 ];
 
 const showDialog = ref(false);

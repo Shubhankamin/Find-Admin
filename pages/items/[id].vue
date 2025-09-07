@@ -87,8 +87,8 @@
               required
               :readonly="mode === 'edit'"
             />
-          </v-col v-if="mode === 'edit'">
-              <v-col cols="12" md="6">
+          </v-col>
+          <v-col cols="12" md="6" v-if="mode === 'edit'">
             <p class="py-2">Expiry Date:</p>
             <v-text-field
               v-model="form.expiryDate"
@@ -258,7 +258,7 @@ onMounted(async () => {
       form.postedAt =
         item?.createdAt?.toDate?.().toISOString().substring(0, 10) || "";
       form.threshold = item?.threshold || null;
-form.expiryDate =
+      form.expiryDate =
         item?.expiryDate?.toDate?.().toISOString().substring(0, 10) || "";
 
       // ✅ Hydrate images if they exist
