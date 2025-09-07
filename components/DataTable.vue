@@ -24,8 +24,8 @@
       </template>
 
       <!-- Actions -->
-      <template #item.actions="{ item }">
-        <div class="d-flex align-center">
+      <template #item.actions="{ item }" class="d-flex align-center">
+        <div class="d-flex align-center ">
           <v-btn icon color="red" variant="text" @click="emitDelete(item)">
             <v-icon>mdi-delete</v-icon>
           </v-btn>

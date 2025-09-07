@@ -164,12 +164,10 @@ const confirmDelete = async () => {
 
 const handleToggle = async (item: any) => {
   try {
-    // item.isEnabled = !item.isEnabled; // optimistic UI update
     await updateLostItem(item.id, { isEnabled: item.isEnabled });
     console.log("✅ isEnabled updated:", item);
   } catch (err) {
     console.error("❌ Failed to update isEnabled:", err);
-    // rollback if failed
     item.isEnabled = !item.isEnabled;
   }
 };

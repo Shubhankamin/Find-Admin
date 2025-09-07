@@ -87,7 +87,18 @@
               required
               :readonly="mode === 'edit'"
             />
-            <!-- <VueDatePicker v-model="date" /> -->
+          </v-col v-if="mode === 'edit'">
+              <v-col cols="12" md="6">
+            <p class="py-2">Expiry Date:</p>
+            <v-text-field
+              v-model="form.expiryDate"
+              placeholder="Expiry Date"
+              type="date"
+              variant="outlined"
+              density="compact"
+              required
+              readonly
+            />
           </v-col>
           <v-col cols="12" md="6">
             <p class="py-2">Threshold:</p>
@@ -197,6 +208,7 @@ const form = reactive({
   postedAt: "",
   images: [],
   threshold: null,
+  expiryDate: "",
 });
 
 const thresholdOptions = [
@@ -246,6 +258,8 @@ onMounted(async () => {
       form.postedAt =
         item?.createdAt?.toDate?.().toISOString().substring(0, 10) || "";
       form.threshold = item?.threshold || null;
+form.expiryDate =
+        item?.expiryDate?.toDate?.().toISOString().substring(0, 10) || "";
 
       // ✅ Hydrate images if they exist
       if (Array.isArray(item?.images)) {
