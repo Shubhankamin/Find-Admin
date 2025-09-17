@@ -101,7 +101,7 @@ const fetchItems = async () => {
       email: doc.contactEmail,
       createdOn: doc.createdAt?.toDate?.()?.toLocaleDateString() ?? "",
       status: doc.status,
-      threshold: doc.threshold || "—",
+      threshold: doc.threshold != null ? `${doc.threshold} days` : "—",
       isEnabled: doc.isEnabled ?? false,
     }));
 

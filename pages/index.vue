@@ -116,21 +116,22 @@ const id = ref();
 const recentLostItems = ref();
 const fetchItems = async () => {
   try {
-    loading.value = true; 
+    loading.value = true;
     const data = await getLostItems();
     recentLostItems.value = data;
-    id.value = data?.id;
-
-    console.log(recentLostItems.value, "Items");
-    console.log(recentLostItems.value.length, "Count");
-    console.log(id.value, "id");
-    console.log("Recent Items:", data);
   } catch (error) {
     console.error("Error fetching items:", error);
   } finally {
-    loading.value = false; 
+    loading.value = false;
   }
 };
+
+// ✅ only run on client, not on SSR
+if (process.client) {
+  onMounted(() => {
+    fetchItems();
+  });
+}
 
 const goToId = (id) => {
   router.push({

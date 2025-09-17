@@ -1,6 +1,5 @@
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore"; // ✅ Import these
 import { useNuxtApp } from "#app";
-
 export function useGetOneLostItem() {
   const { $db } = useNuxtApp();
 
@@ -9,7 +8,12 @@ export function useGetOneLostItem() {
     const snapshot = await getDoc(docRef);
 
     if (snapshot.exists()) {
-      return { id: snapshot.id, ...snapshot.data() };
+      const data = snapshot.data();
+      return {
+        id: snapshot.id,
+        ...data,
+        claimer: data.claimer || null, // ensure claimer field exists
+      };
     } else {
       throw new Error("Item not found");
     }

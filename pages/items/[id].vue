@@ -12,6 +12,15 @@
         <h2 class="mb-4">Add New Lost Item</h2>
       </div>
     </div>
+    <div class="d-flex text-left justify-end pb-5 px-5">
+      <div v-if="form.status === 'pending' && mode === 'edit'">
+        <!-- {{ form.threshold }} -->
+        <v-btn color="green" @click="openClaimerDialog">Add Claimer</v-btn>
+      </div>
+      <!-- <div v-else>
+        <h2 class="mb-4">Add New Lost Item</h2>
+      </div> -->
+    </div>
     <v-container fluid class="px-5">
       <v-form
         ref="formRef"
@@ -169,6 +178,59 @@
         </v-row>
       </v-form>
 
+      <add-claimer-dialog
+        :dialog="showClaimerDialog"
+        :item-id="itemId"
+        @update:dialog="showClaimerDialog = $event"
+        @saved="handleClaimerSaved"
+      />
+
+      <!-- Claimer Info Section -->
+      <div v-if="form.claimer" class="mt-12 overflow-y-hidden px-5">
+        <h3 class="mt-5 mb-8">Claimer Information</h3>
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-text-field
+              label="Claimer Name"
+              :value="form.claimer.name"
+              readonly
+              variant="outlined"
+              density="compact"
+            />
+          </v-col>
+
+          <v-col cols="12" md="6">
+            <v-text-field
+              label="Date Claimed"
+              :value="form.claimer.date"
+              readonly
+              variant="outlined"
+              density="compact"
+            />
+          </v-col>
+
+          <v-col cols="12" md="6">
+            <v-text-field
+              label="Email"
+              :value="form.claimer.email"
+              readonly
+              variant="outlined"
+              density="compact"
+            />
+          </v-col>
+
+          <v-col cols="12" md="6">
+            <v-text-field
+              label="Phone"
+              :value="form.claimer.phone"
+              readonly
+              variant="outlined"
+              density="compact"
+            />
+          </v-col>
+        </v-row>
+      </div>
+
       <div class="d-flex justify-end pt-16">
         <v-btn variant="text" color="grey" class="mr-3" @click="cancel">
           Cancel
@@ -185,6 +247,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useGetOneLostItem } from "~/composables/items/getOneItem";
 import { useAddLostItem } from "~/composables/items/addItems";
 import { useUpdateLostItem } from "~/composables/items/updateItems";
+import AddClaimerDialog from "~/components/AddClaimerDialog.vue";
 
 const { updateLostItem } = useUpdateLostItem();
 
@@ -192,7 +255,7 @@ const router = useRouter();
 const route = useRoute();
 const { getOneLostItem } = useGetOneLostItem();
 const { addLostItem } = useAddLostItem(); // ✅
-
+const showClaimerDialog = ref(false);
 const isValid = ref(false);
 const mode = route.query.mode;
 const itemId = route.params.id;
@@ -209,6 +272,12 @@ const form = reactive({
   images: [],
   threshold: null,
   expiryDate: "",
+  claimer: {
+    name: "",
+    date: "",
+    email: "",
+    phone: "",
+  },
 });
 
 const thresholdOptions = [
@@ -231,15 +300,24 @@ const triggerFileInput = (index: number) => {
   fileInputs.value[index]?.click();
 };
 
-const handleImageUpload = (event: Event, index: number) => {
-  const file = (event.target as HTMLInputElement).files?.[0];
-  if (file) {
-    form.images[index] = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      imagePreviews.value[index] = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+const openClaimerDialog = () => {
+  showClaimerDialog.value = true;
+};
+
+const handleClaimerSaved = async (claimer: any) => {
+  console.log("Claimer saved:", claimer);
+  form.status = "claimed"; // Update status locally
+  form.claimer = claimer; // Store latest claimer
+
+  // Optional: immediately update Firestore with status + claimer
+  try {
+    await updateLostItem(itemId as string, {
+      status: "claimed",
+      claimer: claimer,
+    });
+    console.log("Item status updated to claimed!");
+  } catch (err) {
+    console.error("Failed to update item status:", err);
   }
 };
 
@@ -248,27 +326,23 @@ onMounted(async () => {
   if (mode === "edit" && itemId) {
     try {
       const item = await getOneLostItem(itemId);
-      console.log("Fetched Item:", item);
 
       form.name = item?.itemName || "";
       form.description = item?.description || "";
       form.location = item?.location || "";
       form.email = item?.contactEmail || "";
-      form.status = item?.status || "";
+      form.status = item?.status || "pending";
       form.postedAt =
         item?.createdAt?.toDate?.().toISOString().substring(0, 10) || "";
       form.threshold = item?.threshold || null;
       form.expiryDate =
         item?.expiryDate?.toDate?.().toISOString().substring(0, 10) || "";
+      form.claimer = item?.claimer || null;
 
-      // ✅ Hydrate images if they exist
       if (Array.isArray(item?.images)) {
         form.images = item.images;
         imagePreviews.value = item.images.map((img: string) => img || null);
-
-        while (imagePreviews.value.length < 4) {
-          imagePreviews.value.push(null);
-        }
+        while (imagePreviews.value.length < 4) imagePreviews.value.push(null);
       }
     } catch (err) {
       console.error("Error fetching item:", err);
@@ -288,6 +362,23 @@ const convertToBase64 = (file: File): Promise<string> => {
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = (error) => reject(error);
   });
+};
+
+const onClaimerSaved = async (claimer: any) => {
+  console.log("Claimer saved:", claimer);
+  form.status = "claimed"; // Update status locally
+  form.claimer = claimer; // Store latest claimer
+
+  // Optional: immediately update Firestore with status + claimer
+  try {
+    await updateLostItem(itemId as string, {
+      status: "claimed",
+      claimer: claimer,
+    });
+    console.log("Item status updated to claimed!");
+  } catch (err) {
+    console.error("Failed to update item status:", err);
+  }
 };
 
 const save = async () => {

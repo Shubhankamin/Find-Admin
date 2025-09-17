@@ -76,7 +76,6 @@ import { useRouter } from "vue-router";
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 
-
 definePageMeta({
   layout: "custom",
 });
@@ -120,10 +119,12 @@ const login = async () => {
 
     // Check if user is admin
     const adminRef = doc(db, "admins", user.uid);
+    console.log("Checking admin access for UID:", user.uid);
     const adminDoc = await getDoc(adminRef);
+    console.log("Admin document data:", adminDoc.data());
 
     if (adminDoc.exists()) {
-      // ✅ Store auth data in cookies
+      console.log("Admin data:", adminDoc.data());
       const userCookie = useCookie("user");
       userCookie.value = {
         uid: user.uid,
@@ -141,15 +142,15 @@ const login = async () => {
       snackbarMessage.value = "Access denied: You are not an admin.";
       snackbar.value = true;
 
-      form.reset();
+      // form.reset();
     }
   } catch (error) {
+    console.error("Login error:", error.code, error.message);
     snackbarColor.value = "error";
-    snackbarMessage.value = "Invalid credentials.";
+    snackbarMessage.value = error.message; // show actual reason
     snackbar.value = true;
   } finally {
     loading.value = false;
   }
 };
-
 </script>
