@@ -15,10 +15,11 @@ export function useGetLostItems() {
       const querySnapshot = await getDocs(collection($db, "lost_item"));
       return querySnapshot.docs.map((doc) => {
         const data = doc.data();
+        console.log("📌 Doc Data:", data); // 👀 check if claimer shows here
         return {
           id: doc.id,
           ...data,
-          claimer: data.claimer || null, // Ensure claimer exists
+          claimer: data.claimer || null,
         };
       });
     } catch (err: any) {

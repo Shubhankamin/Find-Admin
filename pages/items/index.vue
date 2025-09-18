@@ -85,6 +85,10 @@ const headers = [
   { title: "Posted By", key: "email" },
   { title: "Status", key: "status" },
   { title: "Threshold", key: "threshold" },
+  { title: "Claimer Email", key: "claimerEmail" },
+  { title: "Claimer Name", key: "claimerName" },
+  { title: "Claimed On", key: "ClaimedOn" },
+  // { title: "Enabled", key: "isEnabled", sortable: false },
   { title: "Actions", key: "actions", sortable: false },
 ];
 
@@ -103,6 +107,12 @@ const fetchItems = async () => {
       status: doc.status,
       threshold: doc.threshold != null ? `${doc.threshold} days` : "—",
       isEnabled: doc.isEnabled ?? false,
+      claimer: doc.claimer || null,
+      claimerEmail: doc.claimer?.email || "—",
+      claimerName: doc.claimer?.name || "—",
+      ClaimedOn: doc.claimer?.date
+        ? new Date(doc.claimer.date).toLocaleDateString()
+        : "—",
     }));
 
     console.log("Items:", items.value);

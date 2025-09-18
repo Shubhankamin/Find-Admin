@@ -185,14 +185,18 @@
         @saved="handleClaimerSaved"
       />
 
+      {{ form.claimer.name }}
+
       <!-- Claimer Info Section -->
       <div v-if="form.claimer" class="mt-12 overflow-y-hidden px-5">
         <h3 class="mt-5 mb-8">Claimer Information</h3>
         <v-row>
           <v-col cols="12" md="6">
+            <p class="mb-5">Claimer Name</p>
+
             <v-text-field
-              label="Claimer Name"
-              :value="form.claimer.name"
+              v-model="form.claimer.name"
+              placeholder="Claimer Name"
               readonly
               variant="outlined"
               density="compact"
@@ -200,9 +204,11 @@
           </v-col>
 
           <v-col cols="12" md="6">
+            <p class="mb-5">Claimed On</p>
+
             <v-text-field
-              label="Date Claimed"
-              :value="form.claimer.date"
+              placeholder="Date Claimed"
+              v-model="form.claimer.date"
               readonly
               variant="outlined"
               density="compact"
@@ -210,9 +216,10 @@
           </v-col>
 
           <v-col cols="12" md="6">
+            <p class="mb-5">Claimer Email</p>
             <v-text-field
-              label="Email"
-              :value="form.claimer.email"
+              placeholder="Email"
+              v-model="form.claimer.email"
               readonly
               variant="outlined"
               density="compact"
@@ -220,9 +227,11 @@
           </v-col>
 
           <v-col cols="12" md="6">
+            <p class="mb-5">Claimer Phone</p>
+
             <v-text-field
-              label="Phone"
-              :value="form.claimer.phone"
+              placeholder="Phone"
+              v-model="form.claimer.phone"
               readonly
               variant="outlined"
               density="compact"
@@ -326,6 +335,7 @@ onMounted(async () => {
   if (mode === "edit" && itemId) {
     try {
       const item = await getOneLostItem(itemId);
+      console.log("Fetched item for editing:", item);
 
       form.name = item?.itemName || "";
       form.description = item?.description || "";
@@ -338,6 +348,10 @@ onMounted(async () => {
       form.expiryDate =
         item?.expiryDate?.toDate?.().toISOString().substring(0, 10) || "";
       form.claimer = item?.claimer || null;
+      form.claimerName = item?.claimer?.name || "";
+      form.claimerDate = item?.claimer?.date || "";
+      form.claimerEmail = item?.claimer?.email || "";
+      form.claimerPhone = item?.claimer?.phone || "";
 
       if (Array.isArray(item?.images)) {
         form.images = item.images;
