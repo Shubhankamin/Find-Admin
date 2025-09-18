@@ -52,7 +52,7 @@
           </v-col>
 
           <v-col cols="12" md="6">
-            <p class="py-2">Where was it lost?:</p>
+            <p class="py-2">Where was it found?:</p>
             <v-text-field
               v-model="form.location"
               placeholder="Where was it lost?"
