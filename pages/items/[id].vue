@@ -185,8 +185,6 @@
         @saved="handleClaimerSaved"
       />
 
-      {{ form.claimer.name }}
-
       <!-- Claimer Info Section -->
       <div v-if="form.claimer" class="mt-12 overflow-y-hidden px-5">
         <h3 class="mt-5 mb-8">Claimer Information</h3>
@@ -363,6 +361,29 @@ onMounted(async () => {
     }
   }
 });
+
+const handleImageUpload = async (event: Event, index: number) => {
+  const target = event.target as HTMLInputElement;
+  if (!target.files || target.files.length === 0) return;
+
+  const file = target.files[0];
+
+  try {
+    // Convert file → base64
+    const base64String = await convertToBase64(file);
+
+    // Save into form + preview arrays
+    form.images[index] = file; // keep original file for saving later
+    imagePreviews.value[index] = base64String; // base64 for immediate preview
+
+    console.log(`Image ${index} uploaded successfully`);
+  } catch (error) {
+    console.error("Error converting image:", error);
+  } finally {
+    // Reset input value so user can re-upload same file if needed
+    target.value = "";
+  }
+};
 
 const removeImage = (index: number) => {
   form.images[index] = null;

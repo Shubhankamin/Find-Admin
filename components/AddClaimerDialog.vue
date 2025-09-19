@@ -68,7 +68,9 @@
       <v-card-actions class="pb-5 px-5">
         <v-spacer />
         <v-btn text @click="closeDialog">Cancel</v-btn>
-        <v-btn color="primary" @click="saveClaimer">ADD</v-btn>
+        <v-btn color="primary" @click="saveClaimer" :disabled="!isValid"
+          >ADD</v-btn
+        >
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -98,6 +100,18 @@ const claimer = reactive({
   email: "",
   phone: "",
 });
+
+const snackbar = ref({
+  show: false,
+  message: "",
+  color: "success",
+});
+
+const showSnackbar = (message: string, color: string = "success") => {
+  snackbar.value.message = message;
+  snackbar.value.color = color;
+  snackbar.value.show = true;
+};
 
 // Validation rules
 const nameRules = [
@@ -156,12 +170,12 @@ const { addClaimer: addClaimerApi } = useLostItems();
 // Save claimer
 const saveClaimer = async () => {
   if (!isValid.value) {
-    alert("Please fill all fields correctly.");
+    showSnackbar("Please fill all fields correctly.", "error");
     return;
   }
 
   if (!props.itemId) {
-    alert("Item ID is missing.");
+    showSnackbar("Item ID is missing.", "error");
     return;
   }
 
@@ -174,17 +188,15 @@ const saveClaimer = async () => {
   };
 
   try {
-    // Update Firestore with claimer info
     await addClaimerApi(props.itemId, fullClaimer);
 
-    // Notify parent component
     emits("saved", fullClaimer);
 
     closeDialog();
-    alert("Claimer added successfully!");
+    showSnackbar("Claimer added successfully!", "success");
   } catch (err: any) {
     console.error("Error adding claimer:", err);
-    alert(err.message || "Failed to add claimer.");
+    showSnackbar(err.message || "Failed to add claimer.", "error");
   }
 };
 </script>
