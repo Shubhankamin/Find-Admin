@@ -76,7 +76,7 @@ const search = ref("");
 const statusFilter = ref("");
 const dialog = ref(false);
 const selectedItem = ref<any>(null);
-const statusOptions = ["claimed", "pending"];
+const statusOptions = ["pending", "claimed", "expired"];
 const loading = ref(true);
 
 const headers = [
@@ -85,10 +85,10 @@ const headers = [
   { title: "Posted By", key: "email" },
   { title: "Status", key: "status" },
   { title: "Threshold", key: "threshold" },
+  { title: "Expired On", key: "expiredOn" }, // <-- ADD THIS
   { title: "Claimer Email", key: "claimerEmail" },
   { title: "Claimer Name", key: "claimerName" },
   { title: "Claimed On", key: "ClaimedOn" },
-  // { title: "Enabled", key: "isEnabled", sortable: false },
   { title: "Actions", key: "actions", sortable: false },
 ];
 
@@ -99,21 +99,47 @@ const fetchItems = async () => {
     loading.value = true;
     const data = await getLostItems();
 
-    items.value = data.map((doc: any) => ({
-      id: doc.id,
-      name: doc.itemName,
-      email: doc.contactEmail,
-      createdOn: doc.createdAt?.toDate?.()?.toLocaleDateString() ?? "",
-      status: doc.status,
-      threshold: doc.threshold != null ? `${doc.threshold} days` : "—",
-      isEnabled: doc.isEnabled ?? false,
-      claimer: doc.claimer || null,
-      claimerEmail: doc.claimer?.email || "—",
-      claimerName: doc.claimer?.name || "—",
-      ClaimedOn: doc.claimer?.date
-        ? new Date(doc.claimer.date).toLocaleDateString()
-        : "—",
-    }));
+    items.value = data
+      .sort((a: any, b: any) => {
+        const dateA = a.updatedAt?.toDate?.() ?? a.createdAt?.toDate?.() ?? 0;
+        const dateB = b.updatedAt?.toDate?.() ?? b.createdAt?.toDate?.() ?? 0;
+        return dateB.getTime() - dateA.getTime(); // newest → oldest
+      })
+      .map((doc: any) => {
+        const createdAt = doc.createdAt?.toDate?.() ?? null;
+        const threshold = doc.threshold ?? null;
+
+        // calculate expiry
+        let expiryDate = null;
+        let status = doc.status;
+
+        if (createdAt && threshold) {
+          expiryDate = new Date(createdAt);
+          expiryDate.setDate(expiryDate.getDate() + threshold);
+
+          // auto mark expired unless it's already claimed
+          if (expiryDate < new Date() && status !== "claimed") {
+            status = "expired";
+          }
+        }
+
+        return {
+          id: doc.id,
+          name: doc.itemName,
+          email: doc.contactEmail,
+          createdOn: createdAt ? createdAt.toLocaleDateString() : "",
+          status, // <-- calculated status
+          threshold: threshold != null ? `${threshold} days` : "—",
+          expiredOn: expiryDate ? expiryDate.toLocaleDateString() : "—", // <-- calculated expiry
+          isEnabled: doc.isEnabled ?? false,
+          claimer: doc.claimer || null,
+          claimerEmail: doc.claimer?.email || "—",
+          claimerName: doc.claimer?.name || "—",
+          ClaimedOn: doc.claimer?.date
+            ? new Date(doc.claimer.date).toLocaleDateString()
+            : "—",
+        };
+      });
 
     console.log("Items:", items.value);
   } catch (err) {

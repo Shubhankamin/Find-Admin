@@ -13,13 +13,20 @@ export function useGetLostItems() {
 
     try {
       const querySnapshot = await getDocs(collection($db, "lost_item"));
+
       return querySnapshot.docs.map((doc) => {
         const data = doc.data();
-        console.log("📌 Doc Data:", data); // 👀 check if claimer shows here
+
         return {
           id: doc.id,
           ...data,
+
+          // Normalize fields for safety
+          status: data.status ?? "pending",
           claimer: data.claimer || null,
+
+          // Support expired date in UI
+          expiredAt: data.expiredAt?.toDate?.() ?? null,
         };
       });
     } catch (err: any) {

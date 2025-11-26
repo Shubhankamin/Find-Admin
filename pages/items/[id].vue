@@ -432,6 +432,15 @@ const save = async () => {
       })
     );
 
+    // Calculate expiry date from postedAt + threshold
+    let createdAtDate = form.postedAt ? new Date(form.postedAt) : new Date();
+    let expiryDate = null;
+
+    if (createdAtDate && form.threshold) {
+      expiryDate = new Date(createdAtDate);
+      expiryDate.setDate(expiryDate.getDate() + form.threshold);
+    }
+
     const payload = {
       itemName: form.name,
       description: form.description,
@@ -441,6 +450,8 @@ const save = async () => {
       status: form.status || "pending",
       images: processedImages,
       threshold: form.threshold,
+      expiryDate, // <-- ADD THIS
+      createdAt: createdAtDate, // only in edit mode (keep existing)
     };
 
     if (mode === "add") {
