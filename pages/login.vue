@@ -102,8 +102,8 @@ const passwordRules = [
   (v) => v.length >= 6 || "Password must be at least 6 characters",
 ];
 
-async function login() {
-  const form = document.querySelector("form");
+const login = async () => {
+  const form = valid;
   if (!valid.value) return;
 
   loading.value = true;
@@ -117,10 +117,20 @@ async function login() {
     );
     const user = userCredential.user;
 
+    // Check if user is admin
     const adminRef = doc(db, "admins", user.uid);
+    console.log("Checking admin access for UID:", user.uid);
     const adminDoc = await getDoc(adminRef);
+    console.log("Admin document data:", adminDoc.data());
 
     if (adminDoc.exists()) {
+      console.log("Admin data:", adminDoc.data());
+      const userCookie = useCookie("user");
+      userCookie.value = {
+        uid: user.uid,
+        email: user.email,
+      };
+
       snackbarColor.value = "success";
       snackbarMessage.value = "Login successful!";
       snackbar.value = true;
@@ -131,16 +141,16 @@ async function login() {
       snackbarColor.value = "error";
       snackbarMessage.value = "Access denied: You are not an admin.";
       snackbar.value = true;
-      // email.value = "";
-      // password.value = "";
-      form.reset();
+
+      // form.reset();
     }
   } catch (error) {
+    console.error("Login error:", error.code, error.message);
     snackbarColor.value = "error";
-    snackbarMessage.value = "Invalid credentials.";
+    snackbarMessage.value = error.message; // show actual reason
     snackbar.value = true;
   } finally {
     loading.value = false;
   }
-}
+};
 </script>
