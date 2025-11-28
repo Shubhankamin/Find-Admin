@@ -146,9 +146,9 @@ app.get("/test-mail", async (req, res) => {
 
 // Daily expiry cron
 app.get("/check-expiry", async (req, res) => {
-  if (req.query.key !== process.env.CRON_SECRET) {
-    return res.status(401).send("Unauthorized");
-  }
+  // TEMPORARILY DISABLED SECURITY
+  console.warn("⚠️ /check-expiry accessed without security key");
+
   try {
     const now = new Date();
     const snapshot = await db.collection("lost_item").get();
@@ -174,7 +174,7 @@ app.get("/check-expiry", async (req, res) => {
           itemName: item.itemName,
           expiryDate: expiry,
           appName: "Lost & Found Portal",
-          ctaUrl: `https://your-app.com/items/${doc.id}`,
+          ctaUrl: "https://lostorfound.netlify.app/",
         });
         await doc.ref.update({ mail_5: true });
       } else if (daysLeft === 1 && !item.mail_1) {
@@ -184,7 +184,7 @@ app.get("/check-expiry", async (req, res) => {
           itemName: item.itemName,
           expiryDate: expiry,
           appName: "Lost & Found Portal",
-          ctaUrl: `https://your-app.com/items/${doc.id}`,
+          ctaUrl: "https://lostorfound.netlify.app/",
         });
         await doc.ref.update({ mail_1: true });
       } else if (daysLeft <= 0 && !item.mail_expired) {
@@ -194,7 +194,7 @@ app.get("/check-expiry", async (req, res) => {
           itemName: item.itemName,
           expiryDate: expiry,
           appName: "Lost & Found Portal",
-          ctaUrl: `https://your-app.com/items/${doc.id}`,
+          ctaUrl: "https://lostorfound.netlify.app/",
         });
         await doc.ref.update({ mail_expired: true, status: "expired" });
       }
