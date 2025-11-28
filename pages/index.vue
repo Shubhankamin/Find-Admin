@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <!-- Page Title -->
-    <h1 class="text-h4 font-weight-bold mb-6">Dashboard</h1>
+    <h1 class="text-h4 font-weight-bold mb-6">Dashboardssss</h1>
     <div class="d-flex justify-end mb-4">
       <v-btn color="primary" @click="showDialog = true">Add Announcement</v-btn>
     </div>
