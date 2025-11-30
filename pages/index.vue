@@ -256,6 +256,7 @@ const { addAnnouncement, loading: addingAnnouncement } = useAddAnnouncement();
 const { getLostItems } = useGetLostItems();
 const { $db } = useNuxtApp();
 const router = useRouter();
+const allItems = ref([]);
 
 const showDialog = ref(false);
 const announcementMessage = ref("");
@@ -278,6 +279,8 @@ const fetchItems = async () => {
     const data = await getLostItems();
     const now = new Date();
 
+    allItems.value = data;
+
     recentLostItems.value = data.filter((item) => {
       const expiry = item.expiryDate?.toDate?.();
       return item.status !== "expired" && expiry && expiry > now;
@@ -285,7 +288,8 @@ const fetchItems = async () => {
 
     expiredItems.value = data.filter((item) => {
       const expiry = item.expiryDate?.toDate?.();
-      return item.status !== "claimed" && expiry && expiry <= now;
+      return expiry && expiry <= now;
+      // NOTE: removed `item.status !== "claimed"`
     });
   } finally {
     loading.value = false;
@@ -301,18 +305,16 @@ const goToId = (id) => {
   router.push({ path: `/items/${id}`, query: { mode: "edit" } });
 };
 
-const totalLost = computed(
-  () => recentLostItems.value.length + expiredItems.value.length
-);
+const totalLost = computed(() => allItems.value.length);
+
 const claimedCount = computed(
-  () =>
-    [...recentLostItems.value, ...expiredItems.value].filter(
-      (item) => item.status === "claimed"
-    ).length
+  () => allItems.value.filter((item) => item.status === "claimed").length
 );
+
 const pendingCount = computed(
-  () => recentLostItems.value.filter((item) => item.status === "pending").length
+  () => allItems.value.filter((item) => item.status === "pending").length
 );
+
 const expiredCount = computed(() => expiredItems.value.length);
 
 const formatTimestamp = (timestamp) => {
