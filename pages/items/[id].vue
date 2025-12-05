@@ -335,7 +335,7 @@ onMounted(async () => {
       const item = await getOneLostItem(itemId);
       console.log("Fetched item for editing:", item);
 
-      form.name = item?.itemName || "";
+      form.name = item?.itemName ?? (item?.name || "");
       form.description = item?.description || "";
       form.location = item?.location || "";
       form.email = item?.contactEmail || "";

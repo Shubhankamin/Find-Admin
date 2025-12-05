@@ -125,7 +125,7 @@ const fetchItems = async () => {
 
         return {
           id: doc.id,
-          name: doc.itemName,
+          name: doc.itemName ?? doc.name,
           email: doc.contactEmail,
           createdOn: createdAt ? createdAt.toLocaleDateString() : "",
           status, // <-- calculated status
@@ -151,12 +151,14 @@ const fetchItems = async () => {
 
 const filteredItems = computed(() => {
   return items.value.filter((item) => {
-    const matchesSearch = item.name
-      .toLowerCase()
-      .includes(search?.value?.toLowerCase());
+    const itemName = item?.name?.toLowerCase() || "";
+    const searchValue = search.value?.toLowerCase() || "";
+
+    const matchesSearch = itemName.includes(searchValue);
     const matchesStatus = statusFilter.value
       ? item.status === statusFilter.value
       : true;
+
     return matchesSearch && matchesStatus;
   });
 });
