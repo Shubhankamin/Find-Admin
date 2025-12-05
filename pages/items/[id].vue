@@ -242,7 +242,7 @@
         <v-btn variant="text" color="grey" class="mr-3" @click="cancel">
           Cancel
         </v-btn>
-        <v-btn color="primary" @click="save"> Save </v-btn>
+        <v-btn color="primary" @click="save" :loading="loading"> Save </v-btn>
       </div>
     </v-container>
   </div>
@@ -257,7 +257,7 @@ import { useUpdateLostItem } from "~/composables/items/updateItems";
 import AddClaimerDialog from "~/components/AddClaimerDialog.vue";
 
 const { updateLostItem } = useUpdateLostItem();
-
+const loading = ref(false);
 const router = useRouter();
 const route = useRoute();
 const { getOneLostItem } = useGetOneLostItem();
@@ -417,6 +417,7 @@ const onClaimerSaved = async (claimer: any) => {
 };
 
 const save = async () => {
+  loading.value = true;
   if (!isValid.value) return;
 
   try {
@@ -467,6 +468,9 @@ const save = async () => {
     }
   } catch (err) {
     console.error("❌ Error saving item:", err);
+    loading.value = false;
+  } finally {
+    loading.value = false;
   }
 };
 </script>

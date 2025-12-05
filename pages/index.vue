@@ -125,7 +125,7 @@
           <tbody>
             <tr v-for="(item, i) in recentLostItems" :key="i">
               <td @click="goToId(item?.id)" class="link">
-                {{ item.itemName }}
+                {{ item.itemName?? item.name }}
               </td>
               <td>{{ item.location }}</td>
               <td>
@@ -172,7 +172,7 @@
           <tbody>
             <tr v-for="(item, i) in expiredItems" :key="i">
               <td @click="goToId(item?.id)" class="link">
-                {{ item.itemName }}
+                {{ item.itemName?? item.name }}
               </td>
               <td>{{ item.location }}</td>
               <td>{{ formatTimestamp(item.expiryDate) }}</td>
@@ -281,15 +281,22 @@ const fetchItems = async () => {
 
     allItems.value = data;
 
-    recentLostItems.value = data.filter((item) => {
-      const expiry = item.expiryDate?.toDate?.();
-      return item.status !== "expired" && expiry && expiry > now;
-    });
+    // ✅ "Recently lost" = latest posted items (by createdAt)
+    const RECENT_LIMIT = 5; // change as needed
 
+    recentLostItems.value = data
+      .filter((item) => item.status !== "expired") // optionally also exclude claimed
+      .sort((a, b) => {
+        const aDate = a.createdAt?.toDate?.() || new Date(0);
+        const bDate = b.createdAt?.toDate?.() || new Date(0);
+        return bDate - aDate; // newest first
+      })
+      .slice(0, RECENT_LIMIT);
+
+    // ❄ Expired items = based on expiryDate (this part is fine)
     expiredItems.value = data.filter((item) => {
       const expiry = item.expiryDate?.toDate?.();
       return expiry && expiry <= now;
-      // NOTE: removed `item.status !== "claimed"`
     });
   } finally {
     loading.value = false;
