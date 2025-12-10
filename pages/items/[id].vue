@@ -39,6 +39,17 @@
               density="compact"
             />
           </v-col>
+          <v-col cols="12" md="6">
+            <p class="py-2">Category:</p>
+            <v-select
+              v-model="form.category"
+              :items="categories"
+              placeholder="Select Category"
+              variant="outlined"
+              density="compact"
+              required
+            />
+          </v-col>
 
           <v-col cols="12" md="6">
             <p class="py-2">Description:</p>
@@ -78,6 +89,17 @@
             <v-select
               v-model="form.status"
               :items="statusOptions"
+              placeholder="Select Status"
+              variant="outlined"
+              density="compact"
+              required
+            />
+          </v-col>
+          <v-col cols="12" md="6">
+            <p class="py-2">Verified:</p>
+            <v-select
+              v-model="form.isVerified"
+              :items="verifiedOptions"
               placeholder="Select Status"
               variant="outlined"
               density="compact"
@@ -272,6 +294,8 @@ console.log("Mode:", mode, "Item ID:", itemId);
 const form = reactive({
   name: "",
   description: "",
+  category: "",
+  isVerified: "No",
   location: "",
   email: "",
   status: "pending", // default
@@ -295,7 +319,17 @@ const thresholdOptions = [
   { label: "3 Months", value: 90 },
 ];
 
-const statusOptions = ["pending", "claimed"];
+const categories = [
+  "Bags",
+  "Electronics",
+  "Books",
+  "Accessories",
+  "Documents",
+  "Others",
+];
+
+const statusOptions = ["pending", "claimed", "expired"];
+const verifiedOptions = ["Yes", "No"];
 
 const imagePreviews = ref([null, null, null, null]);
 const fileInputs = ref([]);
@@ -328,6 +362,29 @@ const handleClaimerSaved = async (claimer: any) => {
   }
 };
 
+const uploadToCloudinary = async (file: File) => {
+  const config = useRuntimeConfig().public;
+  const CLOUD_NAME = config.CLOUDINARY_CLOUD_NAME;
+  const UPLOAD_PRESET = config.CLOUDINARY_UPLOAD_PRESET;
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", UPLOAD_PRESET);
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  const data = await res.json();
+  if (!data.secure_url) throw new Error("Cloudinary upload failed");
+
+  return data.secure_url;
+};
+
 // ✅ Fetch existing item if editing
 onMounted(async () => {
   if (mode === "edit" && itemId) {
@@ -337,9 +394,11 @@ onMounted(async () => {
 
       form.name = item?.itemName ?? (item?.name || "");
       form.description = item?.description || "";
+      form.category = item?.category || "";
       form.location = item?.location || "";
       form.email = item?.contactEmail || "";
       form.status = item?.status || "pending";
+      form.isVerified = item?.isVerified || "No";
       form.postedAt =
         item?.createdAt?.toDate?.().toISOString().substring(0, 10) || "";
       form.threshold = item?.threshold || null;
@@ -369,18 +428,15 @@ const handleImageUpload = async (event: Event, index: number) => {
   const file = target.files[0];
 
   try {
-    // Convert file → base64
-    const base64String = await convertToBase64(file);
+    // upload instantly
+    const uploadedUrl = await uploadToCloudinary(file);
 
-    // Save into form + preview arrays
-    form.images[index] = file; // keep original file for saving later
-    imagePreviews.value[index] = base64String; // base64 for immediate preview
-
-    console.log(`Image ${index} uploaded successfully`);
+    // store uploaded URL
+    form.images[index] = uploadedUrl;
+    imagePreviews.value[index] = uploadedUrl;
   } catch (error) {
-    console.error("Error converting image:", error);
+    console.error("Cloudinary upload failed:", error);
   } finally {
-    // Reset input value so user can re-upload same file if needed
     target.value = "";
   }
 };
@@ -390,14 +446,14 @@ const removeImage = (index: number) => {
   imagePreviews.value[index] = null;
 };
 
-const convertToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
-};
+// const convertToBase64 = (file: File): Promise<string> => {
+//   return new Promise((resolve, reject) => {
+//     const reader = new FileReader();
+//     reader.readAsDataURL(file);
+//     reader.onload = () => resolve(reader.result as string);
+//     reader.onerror = (error) => reject(error);
+//   });
+// };
 
 const onClaimerSaved = async (claimer: any) => {
   console.log("Claimer saved:", claimer);
@@ -421,17 +477,8 @@ const save = async () => {
   if (!isValid.value) return;
 
   try {
-    const selectedImages = form.images.filter((img) => img);
-
-    // Convert only File objects → Base64
-    const processedImages = await Promise.all(
-      selectedImages.map(async (img: any) => {
-        if (img instanceof File) {
-          return await convertToBase64(img);
-        }
-        return img; // keep existing base64 strings
-      })
-    );
+    // Keep only valid images
+    const processedImages = form.images.filter((img) => img);
 
     // Calculate expiry date from postedAt + threshold
     let createdAtDate = form.postedAt ? new Date(form.postedAt) : new Date();
@@ -445,14 +492,21 @@ const save = async () => {
     const payload = {
       itemName: form.name,
       description: form.description,
+      category: form.category,
       location: form.location,
       contactEmail: form.email,
       category: "default",
       status: form.status || "pending",
-      images: processedImages,
+
+      // Convert "Yes"/"No" UI to boolean
+      isVerified: form.isVerified === "Yes",
+
+      images: processedImages, // 🔥 Cloudinary URLs only
+
       threshold: form.threshold,
-      expiryDate, // <-- ADD THIS
-      createdAt: createdAtDate, // only in edit mode (keep existing)
+      expiryDate,
+      createdAt: createdAtDate,
+      updatedAt: new Date(),
     };
 
     if (mode === "add") {
@@ -468,7 +522,6 @@ const save = async () => {
     }
   } catch (err) {
     console.error("❌ Error saving item:", err);
-    loading.value = false;
   } finally {
     loading.value = false;
   }

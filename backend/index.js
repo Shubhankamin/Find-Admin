@@ -173,6 +173,7 @@ app.get("/check-expiry", async (req, res) => {
           variant: "5_days",
           itemName: item.itemName,
           expiryDate: expiry,
+          userName: item.userName || "User",
           appName: "Lost & Found Portal",
           ctaUrl: "https://lostorfound.netlify.app/",
         });
@@ -183,6 +184,7 @@ app.get("/check-expiry", async (req, res) => {
           variant: "1_day",
           itemName: item.itemName,
           expiryDate: expiry,
+          userName: item.userName || "User",
           appName: "Lost & Found Portal",
           ctaUrl: "https://lostorfound.netlify.app/",
         });
@@ -193,6 +195,7 @@ app.get("/check-expiry", async (req, res) => {
           variant: "expired",
           itemName: item.itemName,
           expiryDate: expiry,
+          userName: item.userName || "User",
           appName: "Lost & Found Portal",
           ctaUrl: "https://lostorfound.netlify.app/",
         });
