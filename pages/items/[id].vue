@@ -271,7 +271,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useGetOneLostItem } from "~/composables/items/getOneItem";
 import { useAddLostItem } from "~/composables/items/addItems";
@@ -398,7 +398,7 @@ onMounted(async () => {
       form.location = item?.location || "";
       form.email = item?.contactEmail || "";
       form.status = item?.status || "pending";
-      form.isVerified = item?.isVerified || "No";
+      form.isVerified = item?.isVerified ? "Yes" : "No";
       form.postedAt =
         item?.createdAt?.toDate?.().toISOString().substring(0, 10) || "";
       form.threshold = item?.threshold || null;
@@ -420,6 +420,13 @@ onMounted(async () => {
     }
   }
 });
+watch(
+  () => form.isVerified,
+  (val) => {
+    if (val === true) form.isVerified = "Yes";
+    if (val === false) form.isVerified = "No";
+  }
+);
 
 const handleImageUpload = async (event: Event, index: number) => {
   const target = event.target as HTMLInputElement;
@@ -495,7 +502,6 @@ const save = async () => {
       category: form.category,
       location: form.location,
       contactEmail: form.email,
-      category: "default",
       status: form.status || "pending",
 
       // Convert "Yes"/"No" UI to boolean
