@@ -19,14 +19,14 @@
                 variant="outlined"
                 hide-details="auto"
               />
-              <v-text-field
+              <!-- <v-text-field
                 v-model="announcementEndDate"
                 type="date"
                 variant="outlined"
                 placeholder="End Date (optional)"
                 class="mt-4"
                 hide-details="auto"
-              />
+              /> -->
             </v-card-text>
 
             <v-card-actions class="justify-end">
@@ -36,7 +36,7 @@
                 :loading="addingAnnouncement"
                 @click="submitAnnouncement"
               >
-                Submit
+                ADD 
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -103,7 +103,114 @@
           </template>
         </v-card>
       </v-col>
+
+      
     </v-row>
+
+    <!-- Pending Lost Items -->
+    <div v-if="unverifiedItems.length > 0">
+      <h2 class="text-h5 font-weight-bold my-6">
+        Unverified Lost Items (Awaiting Review)
+      </h2>
+      <v-card elevation="3">
+        <template v-if="loading">
+          <v-skeleton-loader type="table"></v-skeleton-loader>
+        </template>
+        <template v-else>
+          <v-table>
+            <thead>
+              <tr class="bg-grey">
+                <th class="text-left heading font-bold">Item Name</th>
+                <th class="text-left heading font-bold">Location</th>
+                <th class="text-left heading font-bold">Status</th>
+                <th class="text-left heading font-bold">Posted On</th>
+                <th class="text-left heading font-bold">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, i) in unverifiedItems" :key="i">
+                <td @click="goToId(item?.id)" class="link">
+                  {{ item.itemName ?? item.name }}
+                </td>
+                <td>{{ item.location }}</td>
+                <td>
+                  <v-chip color="orange" size="small" text-color="white">
+                    Pending
+                  </v-chip>
+                </td>
+                <td>{{ formatTimestamp(item.createdAt) }}</td>
+                <td>
+                  <v-btn
+                    size="small"
+                    color="primary"
+                    variant="tonal"
+                    @click="goToId(item?.id)"
+                    >View</v-btn
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+        </template>
+      </v-card>
+    </div>
+
+    <div v-if="dailyLostItems.length > 0">
+      <h2 class="text-h5 font-weight-bold my-6">Today’s Lost Items</h2>
+
+      <v-card elevation="3">
+        <template v-if="loading">
+          <v-skeleton-loader type="table"></v-skeleton-loader>
+        </template>
+
+        <template v-else>
+          <v-table>
+            <thead>
+              <tr class="bg-grey">
+                <th class="text-left heading font-bold">Item Name</th>
+                <th class="text-left heading font-bold">Location</th>
+                <th class="text-left heading font-bold">Status</th>
+                <th class="text-left heading font-bold">Posted On</th>
+                <th class="text-left heading font-bold">Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr v-for="(item, i) in dailyLostItems" :key="i">
+                <td @click="goToId(item.id)" class="link">
+                  {{ item.itemName ?? item.name }}
+                </td>
+
+                <td>{{ item.location }}</td>
+
+                <td>
+                  <v-chip
+                    :color="item.status === 'claimed' ? 'green' : 'orange'"
+                    size="small"
+                    text-color="white"
+                  >
+                    {{ item.status }}
+                  </v-chip>
+                </td>
+
+                <td>{{ formatTimestamp(item.createdAt) }}</td>
+
+                <td>
+                  <v-btn
+                    size="small"
+                    color="primary"
+                    variant="tonal"
+                    @click="goToId(item.id)"
+                  >
+                    View
+                  </v-btn>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+        </template>
+      </v-card>
+    </div>
 
     <!-- Recently Lost Items -->
     <h2 class="text-h5 font-weight-bold my-6">Recently Lost Items</h2>
@@ -125,7 +232,7 @@
           <tbody>
             <tr v-for="(item, i) in recentLostItems" :key="i">
               <td @click="goToId(item?.id)" class="link">
-                {{ item.itemName?? item.name }}
+                {{ item.itemName ?? item.name }}
               </td>
               <td>{{ item.location }}</td>
               <td>
@@ -172,7 +279,7 @@
           <tbody>
             <tr v-for="(item, i) in expiredItems" :key="i">
               <td @click="goToId(item?.id)" class="link">
-                {{ item.itemName?? item.name }}
+                {{ item.itemName ?? item.name }}
               </td>
               <td>{{ item.location }}</td>
               <td>{{ formatTimestamp(item.expiryDate) }}</td>
@@ -202,7 +309,7 @@
           <thead>
             <tr class="bg-grey">
               <th class="text-left font-bold">Message</th>
-              <th class="text-left font-bold">End Date</th>
+              <!-- <th class="text-left font-bold">End Date</th> -->
               <th class="text-left font-bold">Status</th>
               <th class="text-left font-bold">Action</th>
             </tr>
@@ -210,7 +317,7 @@
           <tbody>
             <tr v-for="a in announcements" :key="a.id">
               <td>{{ a.message }}</td>
-              <td>{{ formatTimestamp(a.endDate) || "—" }}</td>
+              <!-- <td>{{ formatTimestamp(a.endDate) || "—" }}</td> -->
               <td>
                 <v-chip
                   :color="a.isActive ? 'green' : 'red'"
@@ -271,6 +378,7 @@ const loading = ref(true);
 // Arrays
 const recentLostItems = ref([]);
 const expiredItems = ref([]);
+const unverifiedItems = ref([]);
 
 // Fetch + categorize
 const fetchItems = async () => {
@@ -280,6 +388,15 @@ const fetchItems = async () => {
     const now = new Date();
 
     allItems.value = data;
+
+    // 🔹 Pending Items (only those waiting for approval)
+    unverifiedItems.value = data
+      .filter((item) => item.isVerified === false && item.isDeleted !== true)
+      .sort((a, b) => {
+        const aDate = a.createdAt?.toDate?.() || new Date(0);
+        const bDate = b.createdAt?.toDate?.() || new Date(0);
+        return bDate - aDate;
+      });
 
     // ✅ "Recently lost" = latest posted items (by createdAt)
     const RECENT_LIMIT = 5; // change as needed
@@ -332,6 +449,23 @@ const formatTimestamp = (timestamp) => {
     day: "2-digit",
   });
 };
+
+const dailyLostItems = computed(() => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return [...recentLostItems.value, ...expiredItems.value]
+    .filter((item) => {
+      const created = item.createdAt?.toDate?.() || new Date(item.createdAt);
+      created.setHours(0, 0, 0, 0);
+      return created.getTime() === today.getTime();
+    })
+    .sort((a, b) => {
+      const aDate = a.createdAt?.toDate?.() || new Date(a.createdAt);
+      const bDate = b.createdAt?.toDate?.() || new Date(b.createdAt);
+      return bDate - aDate;
+    });
+});
 
 const fetchAnnouncements = async () => {
   loadingAnnouncements.value = true;

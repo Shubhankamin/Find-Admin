@@ -2,7 +2,10 @@
   <v-container>
     <v-row class="mb-4 align-center justify-space-between">
       <h1>Lost Items</h1>
-      <v-btn color="primary" @click="goToAddItem"> + Add New Item </v-btn>
+      <div class="d-flex ga-3">
+        <v-btn color="success" @click="exportCSV">Export CSV</v-btn>
+        <v-btn color="primary" @click="goToAddItem"> + Add New Item </v-btn>
+      </div>
     </v-row>
 
     <v-row class="mb-4">
@@ -81,9 +84,13 @@ const loading = ref(true);
 
 const headers = [
   { title: "Item Name", key: "name" },
+  { title: "Category", key: "category" },
+
   { title: "Posted On", key: "createdOn" },
   { title: "Posted By", key: "email" },
   { title: "Status", key: "status" },
+  { title: "Verified", key: "isVerified" },
+
   { title: "Threshold", key: "threshold" },
   { title: "Expired On", key: "expiredOn" }, // <-- ADD THIS
   { title: "Claimer Email", key: "claimerEmail" },
@@ -127,8 +134,10 @@ const fetchItems = async () => {
           id: doc.id,
           name: doc.itemName ?? doc.name,
           email: doc.contactEmail,
+          category: doc.category || "—",
           createdOn: createdAt ? createdAt.toLocaleDateString() : "",
           status, // <-- calculated status
+          isVerified: doc.isVerified ? "Yes" : "No",
           threshold: threshold != null ? `${threshold} days` : "—",
           expiredOn: expiryDate ? expiryDate.toLocaleDateString() : "—", // <-- calculated expiry
           isEnabled: doc.isEnabled ?? false,
@@ -203,5 +212,52 @@ const goToAddItem = () => {
 
 const handleItemClick = (item: any) => {
   router.push({ path: `/items/${item.id}`, query: { mode: "edit" } });
+};
+
+const exportCSV = () => {
+  if (!items.value.length) {
+    console.warn("No items to export.");
+    return;
+  }
+
+  // Columns you want
+  const headers = [
+    "Item Name",
+    "Category",
+    "Posted On",
+    "Posted By",
+    "Expired On",
+    "Claimed On",
+    "Claimer Email",
+  ];
+
+  const rows = items.value.map((item) => [
+    item.name || "",
+    item.category || "",
+    item.createdOn || "",
+    item.email || "",
+    item.expiredOn || "",
+    item.ClaimedOn || "",
+    item.claimerEmail || "",
+  ]);
+
+  // Create CSV content
+  const csvContent = [headers, ...rows]
+    .map((row) =>
+      row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",")
+    )
+    .join("\n");
+
+  // Blob download
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "lost_items.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 </script>

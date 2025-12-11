@@ -2,11 +2,21 @@ import express from "express";
 import nodemailer from "nodemailer";
 import admin from "firebase-admin";
 import dotenv from "dotenv";
+import cors from "cors";
+
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 
+// GLOBAL CORS FIX — REQUIRED FOR VERCEL
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
 // Firebase Admin init
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -129,6 +139,22 @@ If this was not you, contact: <a href="mailto:${supportEmail}" style="color:#6b7
 </html>`;
 };
 
+// app.get("/sendVerificationEmail", async (req, res) => {
+//   try {
+//     await transporter.sendMail({
+//       from: process.env.GMAIL_USER,
+//       to: "test@gmail.com", // static test email
+//       subject: "GET method test",
+//       text: "This is a GET request email test.",
+//     });
+
+//     return res.send("GET email sent successfully");
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).send("Email failed: " + err.message);
+//   }
+// });
+
 // Test endpoint
 app.get("/test-mail", async (req, res) => {
   try {
@@ -173,6 +199,7 @@ app.get("/check-expiry", async (req, res) => {
           variant: "5_days",
           itemName: item.itemName,
           expiryDate: expiry,
+          userName: item.userName || "User",
           appName: "Lost & Found Portal",
           ctaUrl: "https://lostorfound.netlify.app/",
         });
@@ -183,6 +210,7 @@ app.get("/check-expiry", async (req, res) => {
           variant: "1_day",
           itemName: item.itemName,
           expiryDate: expiry,
+          userName: item.userName || "User",
           appName: "Lost & Found Portal",
           ctaUrl: "https://lostorfound.netlify.app/",
         });
@@ -193,6 +221,7 @@ app.get("/check-expiry", async (req, res) => {
           variant: "expired",
           itemName: item.itemName,
           expiryDate: expiry,
+          userName: item.userName || "User",
           appName: "Lost & Found Portal",
           ctaUrl: "https://lostorfound.netlify.app/",
         });
@@ -212,6 +241,85 @@ app.get("/check-expiry", async (req, res) => {
     res.send("Expiry check completed");
   } catch (err) {
     res.status(500).send(err.toString());
+  }
+});
+
+app.get("/testEmail", async (req, res) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: "YOUR_PERSONAL_EMAIL@gmail.com",
+      subject: "Backend Email Test",
+      text: "This is a test email from the backend.",
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Email test failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// app.post("/sendVerificationEmail", async (req, res) => {
+//   const { email, itemName } = req.body;
+
+//   if (!email || !itemName) {
+//     return res.status(400).json({ error: "Missing email or itemName" });
+//   }
+
+//   try {
+//     await transporter.sendMail({
+//       from: process.env.GMAIL_USER,
+//       to: email,
+//       subject: "Your lost item is verified",
+//       text: `Your item "${itemName}" is now verified and visible on the client site.`,
+//     });
+
+//     return res.json({ success: true });
+//   } catch (err) {
+//     console.error("Error sending verification email:", err);
+//     return res.status(500).json({ error: "Failed to send email" });
+//   }
+// });
+
+// fetch(
+//   "https://lostfound-backend-iqbon08zf-shubhanks-projects-2f076b2d.vercel.app/sendVerificationEmail",
+//   {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({
+//       email: "test@gmail.com",
+//       itemName: "Test item",
+//     }),
+//   }
+// )
+//   .then((r) => r.json())
+//   .then(console.log)
+//   .catch(console.error);
+
+app.get("/verifyItem", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  const { email, itemName } = req.query;
+
+  if (!email || !itemName) {
+    return res.status(400).send("Missing email or itemName");
+  }
+
+  try {
+    await transporter.sendMail({
+      from: process.env.GMAIL_USER,
+      to: email,
+      subject: "Your item is verified!",
+      text: `Your item "${itemName}" is now verified.`,
+    });
+
+    return res.send("Verification email sent successfully");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Email failed: " + err.message);
   }
 });
 

@@ -18,10 +18,29 @@
           </span>
         </template>
 
+        <template #item.category="{ item }">
+          <span
+            class="text-primary font-weight-medium cursor-pointer"
+            @click="goToEdit(item)"
+          >
+            {{ item.category }}
+          </span>
+        </template>
+
         <!-- ✅ Status Chip -->
         <template #item.status="{ item }">
           <v-chip :color="item.status === 'claimed' ? 'green' : 'orange'" dark>
             {{ item.status === "claimed" ? "Claimed" : "Pending" }}
+          </v-chip>
+        </template>
+
+        <template #item.isVerified="{ item }">
+          <v-chip
+            :color="item.isVerified === 'Yes' ? 'green' : 'orange'"
+            dark
+            style="border-radius: 0px"
+          >
+            {{ item.isVerified === "Yes" ? "Yes" : "No" }}
           </v-chip>
         </template>
 
