@@ -538,13 +538,32 @@ const save = async () => {
         originalVerified.value === "No" && form.isVerified === "Yes";
 
       // STEP 2: Send email only when needed
+      // if (changedToVerified) {
+      //   try {
+      //     const url = `https://lostfound-backend-ai74ui7gs-shubhanks-projects-2f076b2d.vercel.app/verifyItem?email=${encodeURIComponent(
+      //       form.email
+      //     )}&itemName=${encodeURIComponent(form.name)}`;
+
+      //     await $fetch(url); // GET request
+
+      //     console.log("📧 Verification email sent!");
+      //   } catch (err) {
+      //     console.error("❌ Failed to send verification email:", err);
+      //   }
+      // }
+
       if (changedToVerified) {
         try {
-          const url = `https://lostfound-backend-c9nioffe4-shubhanks-projects-2f076b2d.vercel.app/verifyItem?email=${encodeURIComponent(
-            form.email
-          )}&itemName=${encodeURIComponent(form.name)}`;
-
-          await $fetch(url); // GET request
+          await $fetch(
+            " https://lostfound-backend.vercel.app/api/sendVerification",
+            {
+              method: "GET",
+              params: {
+                email: form.email,
+                itemName: form.name,
+              },
+            }
+          );
 
           console.log("📧 Verification email sent!");
         } catch (err) {
@@ -560,6 +579,15 @@ const save = async () => {
     loading.value = false;
   }
 };
+
+// onMounted(async () => {
+//   try {
+//     const res = await $fetch(" https://lostfound-backend-ppiv3zauf-shubhanks-projects-2f076b2d.vercel.app/ping");
+//     console.log("Frontend ping success:", res);
+//   } catch (err) {
+//     console.error("Frontend ping failed:", err);
+//   }
+// });
 </script>
 
 <style scoped>
