@@ -288,6 +288,7 @@ const showClaimerDialog = ref(false);
 const isValid = ref(false);
 const mode = route.query.mode;
 const itemId = route.params.id;
+const originalVerified = ref("No");
 
 console.log("Mode:", mode, "Item ID:", itemId);
 
@@ -479,6 +480,15 @@ const onClaimerSaved = async (claimer: any) => {
   }
 };
 
+onMounted(async () => {
+  if (mode === "edit" && itemId) {
+    const item = await getOneLostItem(itemId);
+
+    form.isVerified = item?.isVerified ? "Yes" : "No";
+    originalVerified.value = form.isVerified;
+  }
+});
+
 const save = async () => {
   loading.value = true;
   if (!isValid.value) return;
@@ -524,6 +534,24 @@ const save = async () => {
     if (mode === "edit" && itemId) {
       await updateLostItem(itemId as string, payload);
       console.log("✅ Item updated successfully!");
+      const changedToVerified =
+        originalVerified.value === "No" && form.isVerified === "Yes";
+
+      // STEP 2: Send email only when needed
+      if (changedToVerified) {
+        try {
+          const url = `https://lostfound-backend-c9nioffe4-shubhanks-projects-2f076b2d.vercel.app/verifyItem?email=${encodeURIComponent(
+            form.email
+          )}&itemName=${encodeURIComponent(form.name)}`;
+
+          await $fetch(url); // GET request
+
+          console.log("📧 Verification email sent!");
+        } catch (err) {
+          console.error("❌ Failed to send verification email:", err);
+        }
+      }
+
       router.push("/items");
     }
   } catch (err) {
