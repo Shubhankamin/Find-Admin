@@ -297,31 +297,46 @@ app.get("/testEmail", async (req, res) => {
 //   .then(console.log)
 //   .catch(console.error);
 
-app.get("/verifyItem", async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+// app.options("/verifyItem", (req, res) => {
+//   res.setHeader("Access-Control-Allow-Origin", "*");
+//   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+//   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+//   res.status(200).end();
+// });
 
-  const { email, itemName } = req.query;
+// app.get("/verifyItem", (req, res) => {
+//   res.setHeader("Access-Control-Allow-Origin", "*");
+//   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+//   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  if (!email || !itemName) {
-    return res.status(400).send("Missing email or itemName");
-  }
+//   const { email, itemName } = req.query;
 
-  try {
-    await transporter.sendMail({
-      from: process.env.GMAIL_USER,
-      to: email,
-      subject: "Your item is verified!",
-      text: `Your item "${itemName}" is now verified.`,
-    });
+//   if (!email || !itemName) {
+//     return res.status(400).json({ error: "Missing email or itemName" });
+//   }
 
-    return res.send("Verification email sent successfully");
-  } catch (err) {
-    console.error(err);
-    return res.status(500).send("Email failed: " + err.message);
-  }
-});
+//   transporter.sendMail(
+//     {
+//       from: process.env.GMAIL_USER,
+//       to: email,
+//       subject: "Your lost item is verified!",
+//       text: `Your item "${itemName}" is now verified.`,
+//     },
+//     (err) => {
+//       if (err) {
+//         console.error(err);
+//         return res.status(500).json({ error: "Email failed" });
+//       }
+
+//       return res.json({ success: true });
+//     }
+//   );
+// });
+
+// app.get("/ping", (req, res) => {
+//   res.setHeader("Access-Control-Allow-Origin", "*");
+//   res.json({ message: "pong", time: Date.now() });
+// });
 
 // REQUIRED FOR VERCEL — do NOT use app.listen()
 export default app;
