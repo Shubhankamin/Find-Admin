@@ -297,6 +297,7 @@ const form = reactive({
   description: "",
   category: "",
   isVerified: "No",
+  isEnabled: true,
   location: "",
   email: "",
   status: "pending", // default
@@ -368,6 +369,8 @@ const uploadToCloudinary = async (file: File) => {
   const CLOUD_NAME = config.CLOUDINARY_CLOUD_NAME;
   const UPLOAD_PRESET = config.CLOUDINARY_UPLOAD_PRESET;
 
+  console.log("Uploading to Cloudinary:", CLOUD_NAME);
+
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", UPLOAD_PRESET);
@@ -377,7 +380,7 @@ const uploadToCloudinary = async (file: File) => {
     {
       method: "POST",
       body: formData,
-    }
+    },
   );
 
   const data = await res.json();
@@ -400,8 +403,13 @@ onMounted(async () => {
       form.email = item?.contactEmail || "";
       form.status = item?.status || "pending";
       form.isVerified = item?.isVerified ? "Yes" : "No";
-      form.postedAt =
-        item?.createdAt?.toDate?.().toISOString().substring(0, 10) || "";
+      form.isEnabled = true;
+      const d = item?.createdAt?.toDate?.();
+      form.postedAt = d
+        ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+            d.getDate(),
+          ).padStart(2, "0")}`
+        : "";
       form.threshold = item?.threshold || null;
       form.expiryDate =
         item?.expiryDate?.toDate?.().toISOString().substring(0, 10) || "";
@@ -426,7 +434,7 @@ watch(
   (val) => {
     if (val === true) form.isVerified = "Yes";
     if (val === false) form.isVerified = "No";
-  }
+  },
 );
 
 const handleImageUpload = async (event: Event, index: number) => {
@@ -435,9 +443,11 @@ const handleImageUpload = async (event: Event, index: number) => {
 
   const file = target.files[0];
 
+  console.log("Selected file:", file);
+
   try {
     // upload instantly
-    const uploadedUrl = await uploadToCloudinary(file);
+    const uploadedUrl = await uploadToCloudinary(file!);
 
     // store uploaded URL
     form.images[index] = uploadedUrl;
@@ -562,7 +572,7 @@ const save = async () => {
                 email: form.email,
                 itemName: form.name,
               },
-            }
+            },
           );
 
           console.log("📧 Verification email sent!");

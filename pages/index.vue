@@ -36,7 +36,7 @@
                 :loading="addingAnnouncement"
                 @click="submitAnnouncement"
               >
-                ADD 
+                ADD
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -103,8 +103,6 @@
           </template>
         </v-card>
       </v-col>
-
-      
     </v-row>
 
     <!-- Pending Lost Items -->
@@ -432,11 +430,11 @@ const goToId = (id) => {
 const totalLost = computed(() => allItems.value.length);
 
 const claimedCount = computed(
-  () => allItems.value.filter((item) => item.status === "claimed").length
+  () => allItems.value.filter((item) => item.status === "claimed").length,
 );
 
 const pendingCount = computed(
-  () => allItems.value.filter((item) => item.status === "pending").length
+  () => allItems.value.filter((item) => item.status === "pending").length,
 );
 
 const expiredCount = computed(() => expiredItems.value.length);
@@ -454,10 +452,13 @@ const dailyLostItems = computed(() => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  return [...recentLostItems.value, ...expiredItems.value]
+  return allItems.value
     .filter((item) => {
+      if (!item.createdAt) return false;
+
       const created = item.createdAt?.toDate?.() || new Date(item.createdAt);
       created.setHours(0, 0, 0, 0);
+
       return created.getTime() === today.getTime();
     })
     .sort((a, b) => {
