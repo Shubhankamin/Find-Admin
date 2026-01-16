@@ -403,7 +403,7 @@ onMounted(async () => {
       form.email = item?.contactEmail || "";
       form.status = item?.status || "pending";
       form.isVerified = item?.isVerified ? "Yes" : "No";
-      form.isEnabled = true;
+      form.isEnabled = item?.isEnabled !== undefined ? item.isEnabled : true;
       const d = item?.createdAt?.toDate?.();
       form.postedAt = d
         ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
@@ -536,7 +536,12 @@ const save = async () => {
     };
 
     if (mode === "add") {
-      const id = await addLostItem(payload);
+      const id = await addLostItem({
+        ...payload,
+        isEnabled: true, // ✅ default ONLY on create
+        createdAt: createdAtDate, // ✅ only once
+      });
+
       console.log("✅ Item added with ID:", id);
       router.push("/items");
     }
